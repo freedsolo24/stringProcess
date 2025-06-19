@@ -1,33 +1,3 @@
-# regex
-1. 匹配电邮 john.doe@example.com  alice\_bob123@domain.org  a-b.c@website.net
-    ```bash
-    ^[a-z0-9]+([.-_]?[a-z0-9]+)*@[a-z]+\.(com|net|org)$
-    // [.-_]?                 保证这3个符号可有可无, 且只能有一个, 言外之意不能连续
-    // [a-z0-9]+              匹配多个字母或数字
-    // ([.-_]?[a-z0-9]+)*     (...)前面的可以有0组或n组, 可以匹配abc_aaa_aa-90
-    ```
-2. 匹配日期 YYYY-MM-DD
-    * 年份（YYYY）：4位数字，如 2025、1999
-    * 月份（MM）：01 到 12（注意前导0）
-    * 日期（DD）：01 到 31（注意前导0）
-    ```bash
-    我的想法: [1-2][0-9]{3}-[0|1][0-9]-[0|1|2|3][0-9]  |在[]是普通字符集不是或的意思
-    正确写法: ^(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$
-    |表示或, 外面要有小括号
-    ```
-3. 匹配ipv4地址
-    * 不应该匹配超过256，只能匹配4段，不能匹配前导0  192.168.001.001
-    ```bash
-    我的想法：([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]).{3}([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])
-    # 1位 | 2位 | 3位 分为 1xx 20x 21x 22x 23x 24x 25[0-5] 
-    正确的写法:
-    ^(0|[1-9][0-9]?|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.
-    (0|[1-9][0-9]?|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.
-    (0|[1-9][0-9]?|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.
-    (0|[1-9][0-9]?|1[0-9]{2}|2[0-4][0-9]|25[0-5])$
-    # 前面有0是为了匹配0.0.0.0
-    # [1-9][0-9]?       匹配 1位或2位
-    ```
 # sed
 1. Delete all lines where the shell is not /bin/bash
    Replace all full names (like "John Doe") with just the first name (e.g., "John")
@@ -71,9 +41,43 @@
     (1) 只保留POST，且把POST替换成METHOD=POST
     sed -n '/POST/s/"\(POST\)/METHOD=\1/p' sed_example.txt
     (2) 仅保留ip, METHOD=POST, 路径
+
     整体的解决方法： sed -n '/POST/s/^\([^ ]*\).*"POST \([^ ]*\).*$/\1 METHOD=POST \2/p' sed_example.txt
     ^\([^ ]*\) 匹配ip地址    192.168.1.44
     .*"POST    匹配的是       - - [10/Jun/2025:10:14:02 +0800] "POST
     \([^ ]*\)  匹配的是路径   /admin 
     .*$        匹配到末尾      HTTP/1.1" 500 128
     ```
+4. 替换以下每行的文本
+   ```bash
+   [INFO] user:alice ip:192.168.1.10 action:login
+   [WARN] user:bob ip:10.0.0.5 action:failed
+   [INFO] user:charlie ip:172.16.0.3 action:login
+   [ERROR] user:david ip:192.168.2.2 action:error
+   ```
+   替换成: ```user=<用户名> ip=<IP地址>```
+   并且action字段是failed或者error, 在行尾加上[!warning]
+
+   ```bash
+            sed -n '
+                /action:\(failed\|error\)/ {
+                s/.*user:\([a-zA-Z0-9_]*\) ip:\([0-9.]*\).*/user=\1 ip=\2 [!warning]/p
+                b
+                }
+                s/.*user:\([a-zA-Z0-9_]*\) ip:\([0-9.]*\).*/user=\1 ip=\2/p
+                ' sed_example.txt
+
+    # action:\(failed\|error\)    匹配action:failed或error
+    # .*                          一直匹配到 [INFO] 
+    # user:                       直接匹配user:
+    # \([a-zA-Z0-9_]*\)           匹配用户名, sed不能使用\w和+
+    # 空格ip:                     匹配 ip:
+    # \([0-9.]*\)                 匹配192.168.1.10
+    # 空格                        匹配空格
+    # action:                     匹配action:
+    # 
+    # 
+    # 执行流程: sed读取一行判断是否匹配failed或者error, 如果匹配执行{ }里面的语句, 最后break
+                如果不匹配直接默认的s/.../.../p
+   ```
+
