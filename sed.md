@@ -1,6 +1,6 @@
 # sed
-1. Delete all lines where the shell is not /bin/bash
-   Replace all full names (like "John Doe") with just the first name (e.g., "John")
+1. 函数所有不是/bin/bash的行
+   把full name替换成first name
     ```bash
     john:x:1001:1001:John Doe:/home/john:/bin/bash
     mary:x:1002:1002:Mary Smith:/home/mary:/bin/bash
@@ -79,5 +79,30 @@
     # 
     # 执行流程: sed读取一行判断是否匹配failed或者error, 如果匹配执行{ }里面的语句, 最后break
                 如果不匹配直接默认的s/.../.../p
+   ```
+   5. 文本如下
+      (1) 每行提取用户名和shell
+      (2) 如果shell是nologin, 后面加上[disabled]
+   ```bash
+   root:x:0:0:Superuser:/root:/bin/bash
+   daemon:x:1:1:Daemon User:/usr/sbin:/usr/sbin/nologin
+   alice:x:1000:1000:Alice Smith:/home/alice:/bin/bash
+   bob:x:1001:1001:Bob Jones:/home/bob:/bin/zsh
+   nobody:x:65534:65534:Nobody:/nonexistent:/usr/sbin/nologin
+   ```
+
+   ```bash
+   第一个需求: sed -n 's/^\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\(.*$\)/user=\1 shell=\2/p' sedExample.txt
+   需要注意: 最后的如果要想匹配 /, 一定要转义, 因为 / 会被理解为分隔符
+   第二个需求: 
+   sed -n '
+        /:nologin$/ {
+        s/^\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\)$/user=\1 shell=\2 [disabled]/p
+        b
+        }
+        s/^\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\)$/user=\1 shell=\2/p
+        ' sedExample.txt
+    注意: 多行写法, 不能用\换行, 整个脚本包括在单引号内
+    多行书写不方便, 可以写在一个脚本内, sed调用脚本
    ```
 
