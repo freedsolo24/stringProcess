@@ -1,5 +1,5 @@
-root:x:0:0:Superuser:/root:/bin/bash
-daemon:x:1:1:Daemon User:/usr/sbin:/usr/sbin/nologin
-alice:x:1000:1000:Alice Smith:/home/alice:/bin/bash
-bob:x:1001:1001:Bob Jones:/home/bob:/bin/zsh
-nobody:x:65534:65534:Nobody:/nonexistent:/usr/sbin/nologin
+[INFO]  2025-06-19 10:00:01 user:alice ip:192.168.1.10 action:login
+[ERROR] 2025-06-19 10:00:15 user:bob ip:10.0.0.5 action:failed
+[INFO]  2025-06-19 10:00:30 user:carol ip:172.16.0.3 action:logout
+[ERROR] 2025-06-19 10:00:45 user:david ip:192.168.2.2 action:error
+[INFO]  2025-06-19 10:01:01 user:eva ip:192.168.1.11 action:login

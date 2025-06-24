@@ -1,6 +1,5 @@
 # sed
-1. 函数所有不是/bin/bash的行
-   把full name替换成first name
+1. (1) 函数所有不是/bin/bash的行, (2) 把full name替换成first name
     ```bash
     john:x:1001:1001:John Doe:/home/john:/bin/bash
     mary:x:1002:1002:Mary Smith:/home/mary:/bin/bash
@@ -13,9 +12,7 @@
     # 思路: 匹配前面冒号分隔的4个字段, 后向引用
     # 匹配第5个字段中的first name, 后向引用, last name不要  
     ```
-2. 只保留登录失败（status:fail）的记录
-   将 user:xxx 替换为 account=xxx
-   去掉 IP 地址字段（ip:...）
+2. (1) 只保留status:fail的记录, (2) 去掉 IP 地址字段(ip:...), (3) 将 user:xxx 替换为 account=xxx
    ```bash
    2025-06-10 09:12:33 | user:alice | ip:192.168.1.10 | status:success
    2025-06-10 09:14:55 | user:bob | ip:192.168.1.22 | status:fail
@@ -27,6 +24,7 @@
    sed -n '/fail/s/ *| *ip:[0-9.]* *|/ |/p' sed_example.txt | sed -n 's/user:\([a-z]*\)/account=\1/p'
    # *| *ip:[^|]* *| 
    #                  用来匹配: 空格 后面可能有多个空格 | 空格 后面可能多个空格 ip: 匹配192.168.1.10 空格 后面可能有多个空格 |
+                      匹配, 然后替换, 不用正则匹配整行, 匹配需要替换的部分
    # user:\([a-z]*\)/account=\1
    #                  用来匹配: user:(人名) 后面要\1 前向引用
    ```
@@ -38,10 +36,6 @@
     192.168.1.44 - - [10/Jun/2025:10:14:02 +0800] "POST /admin HTTP/1.1" 500 128
     ```
     ```bash
-    (1) 只保留POST，且把POST替换成METHOD=POST
-    sed -n '/POST/s/"\(POST\)/METHOD=\1/p' sed_example.txt
-    (2) 仅保留ip, METHOD=POST, 路径
-
     整体的解决方法： sed -n '/POST/s/^\([^ ]*\).*"POST \([^ ]*\).*$/\1 METHOD=POST \2/p' sed_example.txt
     ^\([^ ]*\) 匹配ip地址    192.168.1.44
     .*"POST    匹配的是       - - [10/Jun/2025:10:14:02 +0800] "POST
@@ -49,15 +43,14 @@
     .*$        匹配到末尾      HTTP/1.1" 500 128
     ```
 4. 替换以下每行的文本
+   替换成: ```user=<用户名> ip=<IP地址>```
+   并且action字段是failed或者error, 在行尾加上[!warning]
    ```bash
    [INFO] user:alice ip:192.168.1.10 action:login
    [WARN] user:bob ip:10.0.0.5 action:failed
    [INFO] user:charlie ip:172.16.0.3 action:login
    [ERROR] user:david ip:192.168.2.2 action:error
    ```
-   替换成: ```user=<用户名> ip=<IP地址>```
-   并且action字段是failed或者error, 在行尾加上[!warning]
-
    ```bash
             sed -n '
                 /action:\(failed\|error\)/ {
@@ -90,11 +83,11 @@
    bob:x:1001:1001:Bob Jones:/home/bob:/bin/zsh
    nobody:x:65534:65534:Nobody:/nonexistent:/usr/sbin/nologin
    ```
-
    ```bash
-   第一个需求: sed -n 's/^\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\(.*$\)/user=\1 shell=\2/p' sedExample.txt
-   需要注意: 最后的如果要想匹配 /, 一定要转义, 因为 / 会被理解为分隔符
-   第二个需求: 
+   # 第一个需求需要注意: 最后的如果要想匹配 /, 一定要转义, 因为 / 会被理解为分隔符
+   sed -n 's/^\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\(.*$\)/user=\1 shell=\2/p' sedExample.txt
+   
+   # 第二个需求: 
    sed -n '
         /:nologin$/ {
         s/^\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\)$/user=\1 shell=\2 [disabled]/p
@@ -105,4 +98,23 @@
     注意: 多行写法, 不能用\换行, 整个脚本包括在单引号内
     多行书写不方便, 可以写在一个脚本内, sed调用脚本
    ```
+6. (1) 只提取 action:failed 或 action:error 的行，并输出格式为
+```bash
+[INFO]  2025-06-19 10:00:01 user:alice ip:192.168.1.10 action:login
+[ERROR] 2025-06-19 10:00:15 user:bob ip:10.0.0.5 action:failed
+[INFO]  2025-06-19 10:00:30 user:carol ip:172.16.0.3 action:logout
+[ERROR] 2025-06-19 10:00:45 user:david ip:192.168.2.2 action:error
+[INFO]  2025-06-19 10:01:01 user:eva ip:192.168.1.11 action:login
+
+user=bob ip=10.0.0.5 [WARNING]
+user=david ip=192.168.2.2 [WARNING]
+```
+```bash
+sed -n '
+        /action:\(failed$\|error$\)/s/[^ ]* [^ ]* [^ ]* user:\([a-z]*\) ip:\([0-9.]*\).*/user=\1 ip=\2 [warning]/p
+        ' sedExample.txt
+# 注意: action:(failed$|error$)  ( | ) 用来做两个条件求或, 这三个符号都要做到转义 \( \| \)
+#       ip:([0-9.]*).* 匹配ip地址之后, 还要用.*把后续字符串匹配, 否则打印如下:
+#       user=bob ip=10.0.0.5 [warning] action:failed
+```
 
