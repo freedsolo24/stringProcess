@@ -118,4 +118,30 @@ sed -n '
 #       user=bob ip=10.0.0.5 [warning] action:failed
 #       [^ ]* [^ ]* [^ ]* 我用这堆试图跳过前3段, 但是可以通过.*一并通过
 ```
+7. (1) 匹配GET请求, (2) 匹配POST请求, (3) 忽略其他请求
+```bash
+192.168.1.10 - - [19/Jun/2025:10:00:01 +0800] "GET /index.html HTTP/1.1" 200
+10.0.0.5 - - [19/Jun/2025:10:00:15 +0800] "POST /login HTTP/1.1" 403
+172.16.0.3 - - [19/Jun/2025:10:00:30 +0800] "GET /admin HTTP/1.1" 200
+192.168.2.2 - - [19/Jun/2025:10:00:45 +0800] "DELETE /user/123 HTTP/1.1" 500
+# 输出示例
+[GET] ip=192.168.1.10 path=/index.html
+[POST] ip=10.0.0.5 path=/login
+[GET] ip=172.16.0.3 path=/admin
+```
+```bash
+sed -n '/\(GET\|POST\)/s/^\([0-9.]*\).*"\(GET\|POST\) \([^ ]*\).*/[\2] ip=\1 path=\3/p' sedExample.txt
+# 匹配GET行或POST行
+  \(GET\|POST\)
+# 匹配前面的ip地址
+  ^\([0-9.]*\)
+# 匹配ip地址后一直到 "
+  .*
+# 匹配GET和POST方法
+  \(GET\|POST\)
+# 匹配后面的路径
+  \([^ ]*\)
+# 匹配剩余的字符串
+  .*
+```
 

@@ -1,5 +1,4 @@
-[INFO]  2025-06-19 10:00:01 user:alice ip:192.168.1.10 action:login
-[ERROR] 2025-06-19 10:00:15 user:bob ip:10.0.0.5 action:failed
-[INFO]  2025-06-19 10:00:30 user:carol ip:172.16.0.3 action:logout
-[ERROR] 2025-06-19 10:00:45 user:david ip:192.168.2.2 action:error
-[INFO]  2025-06-19 10:01:01 user:eva ip:192.168.1.11 action:login
+192.168.1.10 - - [19/Jun/2025:10:00:01 +0800] "GET /index.html HTTP/1.1" 200
+10.0.0.5 - - [19/Jun/2025:10:00:15 +0800] "POST /login HTTP/1.1" 403
+172.16.0.3 - - [19/Jun/2025:10:00:30 +0800] "GET /admin HTTP/1.1" 200
+192.168.2.2 - - [19/Jun/2025:10:00:45 +0800] "DELETE /user/123 HTTP/1.1" 500
