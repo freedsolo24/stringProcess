@@ -79,3 +79,20 @@
 # 我想匹配的数字在后面, 前面是￥, 用后向断言
 (?<=￥)\d+
 ```
+8. 匹配 http:// 和 https:// ftp:// mailto: file:///
+```bash
+我的想法: [http|https]:// 这是错误的，因为[ ]里面只能匹配字符，不能匹配字符串
+应该是:    ^http(s)?://   或者   ^https://
+
+http://example.com  
+https://secure.example.com  
+ftp://files.example.com  
+mailto:someone@example.com  
+file:///home/user/file.txt  
+random text
+只匹配协议前缀，不匹配后面的路径或邮箱地址
+```
+```bash
+(?:https?|ftp)://|file:///|mailto:
+# ?:说明这个括号是非捕获组
+```
