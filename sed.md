@@ -144,4 +144,27 @@ sed -n '/\(GET\|POST\)/s/^\([0-9.]*\).*"\(GET\|POST\) \([^ ]*\).*/[\2] ip=\1 pat
 # 匹配剩余的字符串
   .*
 ```
+8. (1)/bin/bash前面标记[LOGIN](2)其他都标记[DISABLED]
+```bash
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+mysql:x:27:27:MySQL Server:/var/lib/mysql:/bin/false
+nginx:x:101:101:Nginx Web Server:/var/lib/nginx:/sbin/nologin
+nobody:x:-1:-1:Unprivileged:/nonexistent:/usr/sbin/nologin
+```
+```bash
+[LOGIN] user=root shell=/bin/bash
+[DISABLED] user=daemon shell=/usr/sbin/nologin
+[DISABLED] user=mysql shell=/bin/false
+[DISABLED] user=nginx shell=/sbin/nologin
+[DISABLED] user=nobody shell=/usr/sbin/nologin
+```
+```bash
+sed -n '/:\/bin\/bash$/ {
+       s/^\([^:]*\):x:[^:]*:[^:]*:[^:]*:[^:]*:\(.*\)$/[LOGIN] user=\1 shell=\2/p
+       b
+       }
+       s/^\([^:]*\):x:[^:]*:[^:]*:[^:]*:[^:]*:\(.*\)$/[DISABLED] user=\1 shell=\2/p
+' sedExample.txt
+```
 
