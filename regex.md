@@ -100,3 +100,17 @@ random text
 ```bash
 [1-9][0-9]{5}(19|20)[0-9]{2}(0[1-9]|1[1-2])(0[1-9]|[1-2][0-9]|3[0-1])[0-9]{3}[0-9X]
 ```
+10. 匹配url中域名的部分(不含后面的路径, 或查询串)
+```bash
+https://www.example.com/path/page	www.example.com
+http://sub.domain.co.uk:8080/index	sub.domain.co.uk
+ftp://fileserver.local/downloads	（未匹配，因前缀非 http/https）
+www.example.com/dir	                www.example.com
+example.com	                        example.com
+```
+```bash
+^(?:https?://)?([^/:]+)
+# ?:非捕获组, 不保存为结果
+# (?:https?://)?: 整个协议部分 http, https 可有可无
+# ([^/]+)中的 ( ) 捕获组1; [^/:]+ 除了 :/ 都捕获, 直到后面遇见 :/
+```

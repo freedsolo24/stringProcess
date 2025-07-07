@@ -1,4 +1,8 @@
 # sed
+```bash
+# sed默认使用基本正则, 基本正则没有 | , 如果在sed里面写了 (  )  |  {  }, 要用 \ 进行转义
+```
+
 1. (1) 函数所有不是/bin/bash的行, (2) 把full name替换成first name
     ```bash
     john:x:1001:1001:John Doe:/home/john:/bin/bash
@@ -167,4 +171,34 @@ sed -n '/:\/bin\/bash$/ {
        s/^\([^:]*\):x:[^:]*:[^:]*:[^:]*:[^:]*:\(.*\)$/[DISABLED] user=\1 shell=\2/p
 ' sedExample.txt
 ```
+9. 使用 一条 sed 命令，将每一行根据用户的 UID（第3列）进行分类，并输出如下格式
+```bash
+源文件:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+mysql:x:27:27:MySQL Server:/var/lib/mysql:/bin/false
+user1:x:1000:1000:Normal User:/home/user1:/bin/bash
+user2:x:1001:1001:Normal User:/home/user2:/bin/zsh
+nobody:x:65534:65534:Unprivileged:/nonexistent:/usr/sbin/nologin
 
+目标输出:
+(1) [SYSTEM]	UID（第 3 个字段） < 1000
+(2) [NORMAL]	UID >= 1000 且 UID < 65534
+(3) [OTHER]	UID >= 65534
+[SYSTEM] user=root uid=0 shell=/bin/bash
+[SYSTEM] user=daemon uid=1 shell=/usr/sbin/nologin
+[SYSTEM] user=mysql uid=27 shell=/bin/false
+[NORMAL] user=user1 uid=1000 shell=/bin/bash
+[NORMAL] user=user2 uid=1001 shell=/bin/zsh
+[OTHER] user=nobody uid=65534 shell=/usr/sbin/nologin
+```
+```bash
+提示: 
+你可以用三个 sed 替换语句实现三类条件。
+每类可以用正则匹配 UID 字段的范围，如：
+UID 为 1-3 位数字：:[0-9]\{1,3\}:
+UID 为 4 位 1000 开头：:100[0-9]:
+UID 为 5 位并且 >=65534：:6553[4-9]: 或 :655[4-9][0-9]:
+
+
+```

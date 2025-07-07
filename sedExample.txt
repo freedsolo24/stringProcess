@@ -1,5 +1,6 @@
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 mysql:x:27:27:MySQL Server:/var/lib/mysql:/bin/false
-nginx:x:101:101:Nginx Web Server:/var/lib/nginx:/sbin/nologin
-nobody:x:-1:-1:Unprivileged:/nonexistent:/usr/sbin/nologin
+user1:x:1000:1000:Normal User:/home/user1:/bin/bash
+user2:x:1001:1001:Normal User:/home/user2:/bin/zsh
+nobody:x:65534:65534:Unprivileged:/nonexistent:/usr/sbin/nologin
