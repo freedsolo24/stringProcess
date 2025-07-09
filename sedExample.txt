@@ -1,6 +1,4 @@
-root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-mysql:x:27:27:MySQL Server:/var/lib/mysql:/bin/false
-user1:x:1000:1000:Normal User:/home/user1:/bin/bash
-user2:x:1001:1001:Normal User:/home/user2:/bin/zsh
-nobody:x:65534:65534:Unprivileged:/nonexistent:/usr/sbin/nologin
+{INFO} 2025-06-01 12:01:23 user:alice status:success ip:192.168.1.5
+{INFO} 2025-06-01 12:03:44 user:bob status:fail ip:10.0.0.3
+{INFO} 2025-06-01 12:05:01 user:charlie status:success ip:192.168.1.10
+{INFO} 2025-06-01 12:06:22 user:david status:error ip:172.16.0.2

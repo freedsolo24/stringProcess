@@ -1,6 +1,12 @@
 # sed
 ```bash
-# sed默认使用基本正则, 基本正则没有 | , 如果在sed里面写了 (  )  |  {  }, 要用 \ 进行转义
+# BRE: grep, sed, awk
+# BRE元字符:          . ^ $ *  [...]  [^...]   \(...\)   \1   \2   
+# BRE有的元字符要转义: \+   \?   \|   \{j,k\}
+# ERE: grep -E, sed -E 
+# ERE元字符:          + ? {j,k} (...) \1 \2   这些元字符在ERE中都不需要转义
+---
+# 末尾换行: $ a\  $ 匹配最后一行; a\ 追加一个空行
 ```
 
 1. (1) 函数所有不是/bin/bash的行, (2) 把full name替换成first name
@@ -199,6 +205,30 @@ nobody:x:65534:65534:Unprivileged:/nonexistent:/usr/sbin/nologin
 UID 为 1-3 位数字：:[0-9]\{1,3\}:
 UID 为 4 位 1000 开头：:100[0-9]:
 UID 为 5 位并且 >=65534：:6553[4-9]: 或 :655[4-9][0-9]:
+```
+10. 你有一个日志文件 access.log，其中每一行格式如下（类似 Web 访问日志）
+```bash
+192.168.1.1 - - [12/Jun/2025:15:32:45 +0800] "GET /index.html HTTP/1.1" 200 1234
+10.0.0.2 - - [12/Jun/2025:15:33:01 +0800] "POST /login HTTP/1.1" 403 231
+172.16.0.5 - - [12/Jun/2025:15:34:17 +0800] "GET /admin HTTP/1.1" 401 876
 
+输出格式如下:
+METHOD=GET PATH=/index.html STATUS=200
+METHOD=POST PATH=/login STATUS=403
+METHOD=GET PATH=/admin STATUS=401
+```
+```bash
+sed -n 's/.*"\(GET\|POST\) \([^ ]*\) HTTP\/1.1" \([0-9]\{3\}\).*/METHOD=\1 PATH=\2 STATUS=\3/p' sedExample.txt
+```
+11. 你有一个日志文件 login.log，内容如下（格式类似系统登录日志）
+```bash
+[INFO] 2025-06-01 12:01:23 user:alice status:success ip:192.168.1.5
+[INFO] 2025-06-01 12:03:44 user:bob status:fail ip:10.0.0.3
+[INFO] 2025-06-01 12:05:01 user:charlie status:success ip:192.168.1.10
+[INFO] 2025-06-01 12:06:22 user:david status:error ip:172.16.0.2
 
+成功的记录（status:success）输出为
+[LOGIN] user=alice ip=192.168.1.5
+失败或错误的记录（status:fail 或 status:error）输出为：
+[WARNING] user=bob ip=10.0.0.3
 ```
